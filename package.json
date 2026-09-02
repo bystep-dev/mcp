@@ -1,0 +1,16 @@
+{
+  "name": "@bystep/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Bystep — lets Claude Code, Cursor and other MCP clients fetch the PRD and work through plan tasks one at a time.",
+  "type": "module",
+  "bin": { "bystep-mcp": "bin/bystep-mcp.js" },
+  "files": ["bin", "src", "README.md"],
+  "engines": { "node": ">=18" },
+  "license": "MIT",
+  "keywords": ["bystep", "mcp", "model-context-protocol", "ai", "coding-agent"],
+  "scripts": { "test": "node --test test/*.test.mjs" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.25.0"
+  }
+}
