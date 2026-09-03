@@ -11,7 +11,7 @@ const refSchema = z.string().describe('Task ref as returned by task_next (e.g. "
 
 const resolvePlan = (planId) => {
   const id = planId || defaultPlanId()
-  if (!id) throw new ApiError(400, 'planId required (pass it, set BYSTEP_PLAN_ID, or run `npx bystep connect --plan <id>`)', 'bad_request')
+  if (!id) throw new ApiError(400, 'planId required (pass it, set BYSTEP_PLAN_ID, or run `npx @bystep/cli connect --plan <id>`)', 'bad_request')
   return id
 }
 const okText = (s) => ({ content: [{ type: 'text', text: typeof s === 'string' ? s : JSON.stringify(s, null, 2) }] })
@@ -48,9 +48,9 @@ export function createServer() {
   server.registerTool('task_complete', { title: 'Complete task', description: 'Mark a task done, then call task_next again.', inputSchema: { planId: planIdSchema, ref: refSchema } }, setStatus('done'))
   server.registerTool('task_fail', { title: 'Fail task', description: 'Mark a task failed with a short reason when blocked, then continue with task_next.', inputSchema: { planId: planIdSchema, ref: refSchema, reason: z.string().min(1).max(500).describe('Short reason why the task is blocked.') } }, setStatus('failed'))
 
-  server.registerTool('sync_status', { title: 'Codebase sync status', description: 'Index/summary counts of the connected workspace: { status, fileCount, summarisedCount, hasWiki, wikiVersion }. Run `npx bystep sync --plan` / `npx bystep sync` from the CLI to update the index.', inputSchema: { workspaceId: z.string().optional().describe('Workspace id. Defaults to BYSTEP_WORKSPACE_ID or .bystep/config.json workspaceId.') } }, wrap(async ({ workspaceId }) => {
+  server.registerTool('sync_status', { title: 'Codebase sync status', description: 'Index/summary counts of the connected workspace: { status, fileCount, summarisedCount, hasWiki, wikiVersion }. Run `npx @bystep/cli sync --plan` / `npx @bystep/cli sync` from the CLI to update the index.', inputSchema: { workspaceId: z.string().optional().describe('Workspace id. Defaults to BYSTEP_WORKSPACE_ID or .bystep/config.json workspaceId.') } }, wrap(async ({ workspaceId }) => {
     const id = workspaceId || defaultWorkspaceId()
-    if (!id) throw new ApiError(400, 'workspaceId required (pass it, set BYSTEP_WORKSPACE_ID, or run `npx bystep connect`)', 'bad_request')
+    if (!id) throw new ApiError(400, 'workspaceId required (pass it, set BYSTEP_WORKSPACE_ID, or run `npx @bystep/cli connect`)', 'bad_request')
     return api(`/api/workspaces/${encodeURIComponent(id)}/codebase-status`)
   }))
 
