@@ -1,0 +1,27 @@
+name: Agent / client support request
+description: Report an MCP client that doesn't work well with @bystep/mcp, or ask for a tool a client needs.
+title: "[agent] "
+labels: [agent-support]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This server speaks standard MCP over stdio (`@modelcontextprotocol/sdk`), so most clients should work out of the box. Use this template for client-specific quirks (schema handling, tool-call limits, etc.) or to request a new tool. For installing the *skill* (project instructions) into a new coding agent, that lives in `@bystep/cli` — see https://github.com/bystep-dev/cli instead.
+  - type: input
+    id: client
+    attributes:
+      label: Client name
+      placeholder: "e.g. Windsurf, Zed, a custom MCP client"
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: What doesn't work, or what tool is missing
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Links / logs
+      description: Client docs, relevant logs (redact any `bs_…` token).

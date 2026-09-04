@@ -1,0 +1,60 @@
+name: Bug report
+description: Something in the MCP server doesn't work as expected.
+title: "[bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report.
+  - type: input
+    id: version
+    attributes:
+      label: MCP server version
+      description: Output of `npx @bystep/mcp -v` (or your lockfile's resolved version)
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node version
+      description: Output of `node -v`
+      placeholder: "v20.11.0"
+    validations:
+      required: true
+  - type: input
+    id: client
+    attributes:
+      label: MCP client
+      placeholder: "Claude Code / Cursor / Codex / other"
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: mcpServers config for bystep
+      description: Your client's `bystep` entry (redact any `bs_…` token before pasting — replace it with `bs_…`)
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: tool
+    attributes:
+      label: Tool call that failed
+      description: Which tool, with what arguments (redact ids you'd rather not share)
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: The tool result / error text, and anything printed to stderr on server start.
+    validations:
+      required: true

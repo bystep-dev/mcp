@@ -12,5 +12,13 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
     "zod": "^3.25.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bystep-dev/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bystep-dev/mcp/issues"
+  },
+  "homepage": "https://bystep.dev/docs"
 }
