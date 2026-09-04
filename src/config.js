@@ -3,6 +3,8 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
+export const VERSION = '0.2.0'
+
 const readJson = (p, fallback) => {
   try {
     return JSON.parse(fs.readFileSync(p, 'utf8'))

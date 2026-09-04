@@ -1,6 +1,6 @@
 {
   "name": "@bystep/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for Bystep — lets Claude Code, Cursor and other MCP clients fetch the PRD and work through plan tasks one at a time.",
   "type": "module",
   "bin": { "bystep-mcp": "bin/bystep-mcp.js" },

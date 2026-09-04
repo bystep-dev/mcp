@@ -1,4 +1,4 @@
-import { apiUrl, token } from './config.js'
+import { apiUrl, token, VERSION } from './config.js'
 
 export class ApiError extends Error {
   constructor(status, message, code) {
@@ -11,7 +11,7 @@ export class ApiError extends Error {
 export async function api(path, { method = 'GET', body, text = false } = {}) {
   const tk = token()
   if (!tk) throw new ApiError(401, 'Not logged in: set BYSTEP_TOKEN or run `npx @bystep/cli login`', 'no_token')
-  const headers = { accept: text ? 'text/plain' : 'application/json', authorization: `Bearer ${tk}` }
+  const headers = { accept: text ? 'text/plain' : 'application/json', authorization: `Bearer ${tk}`, 'x-bystep-mcp': VERSION }
   if (body !== undefined) headers['content-type'] = 'application/json'
   const res = await fetch(`${apiUrl()}${path}`, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined })
   const raw = await res.text()

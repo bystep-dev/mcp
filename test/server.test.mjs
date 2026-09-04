@@ -14,12 +14,41 @@ async function connected() {
   return { client, close: () => Promise.all([client.close(), server.close()]) }
 }
 
-test('initialize + tools/list exposes the seven Bystep tools', async () => {
+test('initialize + tools/list exposes all Bystep tools, including the Proof-of-Done additions', async () => {
   const { client, close } = await connected()
   const { tools } = await client.listTools()
-  assert.deepEqual(tools.map((t) => t.name).sort(), ['plan_get', 'plan_list', 'sync_status', 'task_complete', 'task_fail', 'task_next', 'task_start'])
+  assert.deepEqual(
+    tools.map((t) => t.name).sort(),
+    ['phase_approve', 'plan_get', 'plan_list', 'sync_status', 'task_complete', 'task_evidence_get', 'task_fail', 'task_next', 'task_packet', 'task_start', 'task_verify', 'wave_next'],
+  )
   const fail = tools.find((t) => t.name === 'task_fail')
   assert.deepEqual(fail.inputSchema.required.sort(), ['reason', 'ref'])
+
+  const verify = tools.find((t) => t.name === 'task_verify')
+  assert.equal(verify.inputSchema.required?.includes('planId'), false)
+  assert.deepEqual(Object.keys(verify.inputSchema.properties).sort(), ['noScreenshot', 'override', 'planId', 'ref', 'skip', 'timeoutSeconds'])
+
+  const packet = tools.find((t) => t.name === 'task_packet')
+  assert.match(packet.description, /Fresh context for ONE task/)
+
+  const complete = tools.find((t) => t.name === 'task_complete')
+  assert.match(complete.description, /Requires passing evidence; call task_verify first/)
+
+  const next = tools.find((t) => t.name === 'task_next')
+  assert.match(next.description, /checkpoint_pending is true, STOP/)
+  assert.ok(next.inputSchema.properties.packet)
+
+  const evidenceGet = tools.find((t) => t.name === 'task_evidence_get')
+  assert.deepEqual(evidenceGet.inputSchema.required.sort(), ['ref'])
+
+  const approve = tools.find((t) => t.name === 'phase_approve')
+  assert.deepEqual(approve.inputSchema.required.sort(), ['phase'])
+
+  const wave = tools.find((t) => t.name === 'wave_next')
+  assert.equal(!!wave.inputSchema.required?.includes('planId'), false)
+  assert.deepEqual(Object.keys(wave.inputSchema.properties).sort(), ['packet', 'planId'])
+  assert.match(wave.description, /Bystep never runs them — you do/)
+
   await close()
 })
 

@@ -43,20 +43,19 @@ Read the full input/output schemas in [`src/index.js`](./src/index.js) — every
 |---|---|
 | `plan_get` | Fetch the full PRD of a plan as text (or `json: true` for the raw JSON): goals, features, tech stack. Read it once before starting tasks |
 | `plan_list` | List the logged-in user's plans with status and workspace |
-| `task_next` | Ask the server for ONE next task of a plan. Returns `{ done, task:{ref,title,layer,...}, progress:{phase:{current,total}, layer, page, doneTasks, totalTasks} }`. `done: true` means everything is finished. **Checkpoint**: if `layer` or `phase.current` differs from the task you just finished, stop and report to the user before `task_start` |
+| `task_next` | Ask the server for ONE next task of a plan. Returns `{ done, task:{ref,title,layer,tier,acceptance,packet,...}, execution, checkpoint_pending, checkpoint?, progress }`. `done: true` means everything is finished. **If `checkpoint_pending` is true, STOP and report to the user** (execution mode `checkpoint`/`strict`) — in `autopilot` mode this never happens except at done |
+| `task_packet` | Fresh, small context for ONE task, rendered as Markdown (title, tier, feature goal, PRD excerpt, acceptance table, owned files, do-not-touch, relevant files, conventions, verify commands). Read this instead of `plan_get`'s full PRD while working on a task |
 | `task_start` | Mark a task `in_progress`. Work ONLY on this task until it is done |
-| `task_complete` | Mark a task `done`, then call `task_next` again |
+| `task_verify` | Run the task's acceptance criteria **locally in this process** (test/build/lint via shell, http via fetch, file existence, screenshot/manual reported as skipped) and upload pass/fail evidence — mirrors `bystep task verify`. Call this before `task_complete` |
+| `task_complete` | Requires passing evidence; call `task_verify` first. The server rejects an unverified `done` with `409 evidence_required` unless an override reason is passed (recorded and visible in the workspace). Marks the task done and returns the next step |
 | `task_fail` | Mark a task `failed` with a short reason when blocked, then continue with `task_next` |
+| `task_evidence_get` | Read back the evidence trail of a task (newest first): status, attempt, passed/total, commit, diff, verifier, override reason, reviewer note, date |
+| `phase_approve` | Record a human checkpoint approval for a phase/layer, unblocking `task_next` in `checkpoint`/`strict` execution mode; optionally return specific tasks to the agent with a reason |
 | `sync_status` | Index/summary counts of the connected workspace: `{ status, fileCount, summarisedCount, hasWiki, wikiVersion }`. The index itself is updated by the CLI (`npx @bystep/cli sync --plan` / `npx @bystep/cli sync`), not by this server — the MCP server never reads or uploads your source files |
 
-### Coming in v0.2 — Proof-of-Done
+### Proof-of-Done loop
 
-Two tools are being added alongside the CLI's `task verify`:
-
-- `task_verify {planId?, ref, skip?[], override?}` — runs the task's acceptance criteria and uploads pass/fail evidence, mirroring `bystep task verify`.
-- `task_evidence_get {planId?, ref}` — reads back the evidence trail for a task.
-
-`task_complete`'s description will change to make the new requirement explicit: "Requires passing evidence; call task_verify first." — the server rejects an unverified `done` unless the caller passes an override reason, which is recorded and visible in the workspace.
+`task_next → task_start → task_packet → do only that task → task_verify → task_complete`. Verification is mandatory: `task_complete` is rejected until `task_verify` has recorded a pass (or the caller passes an explicit override reason, which is always recorded and visible). Three execution modes live in `execution.mode` (also returned by `task_next`): `autopilot` never stops the loop except at done; `checkpoint` stops once per phase/layer group for a human to call `phase_approve`; `strict` stops after every task the same way.
 
 ## Privacy
 
@@ -122,11 +121,11 @@ Autentikasi diambil dari env `BYSTEP_TOKEN`, atau jatuh ke login yang tersimpan 
 
 ### Daftar tool
 
-Lihat tabel "Tools" di atas — sama untuk semua bahasa. Ringkasnya: `plan_get`/`plan_list` (baca PRD/daftar plan), `task_next`/`task_start`/`task_complete`/`task_fail` (loop task, dengan aturan checkpoint), `sync_status` (hitungan indeks — sinkron sendiri tetap lewat CLI).
+Lihat tabel "Tools" di atas — sama untuk semua bahasa. Ringkasnya: `plan_get`/`plan_list` (baca PRD/daftar plan), `task_next`/`task_start`/`task_packet`/`task_verify`/`task_complete`/`task_fail` (loop task Proof-of-Done, dengan aturan checkpoint), `task_evidence_get` (jejak bukti), `phase_approve` (persetujuan checkpoint), `sync_status` (hitungan indeks — sinkron sendiri tetap lewat CLI).
 
-### Akan datang di v0.2 — Proof-of-Done
+### Proof-of-Done
 
-Dua tool baru menyertai `task verify` di CLI: `task_verify` (menjalankan acceptance criteria dan mengunggah bukti lulus/gagal) dan `task_evidence_get` (membaca jejak bukti sebuah task). Deskripsi `task_complete` akan berubah menjadi "Requires passing evidence; call task_verify first."
+Loop: `task_next → task_start → task_packet → kerjakan task itu saja → task_verify → task_complete`. Verifikasi wajib: `task_complete` ditolak sampai `task_verify` mencatat lulus (atau pemanggil memberi alasan override, yang selalu dicatat dan terlihat). Tiga mode eksekusi ada di `execution.mode`: `autopilot` tidak pernah berhenti kecuali selesai; `checkpoint` berhenti sekali per grup fase/layer menunggu manusia memanggil `phase_approve`; `strict` berhenti setelah setiap task.
 
 ### Privasi
 
